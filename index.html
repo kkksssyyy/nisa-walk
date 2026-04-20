@@ -36,13 +36,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .s3-chart{order:1;width:100%;display:flex;flex-direction:column;}
 .s3-info{order:0;width:100%;display:flex;flex-direction:column;align-items:center;}
 @media(min-width:768px){
-  #s3{flex-direction:row;align-items:stretch;gap:28px;padding:0.75rem 0;height:420px;}
+  #s3{flex-direction:row;align-items:stretch;gap:28px;padding:0.75rem 0;height:435px;}
   .s3-chart{order:0;flex:1;min-width:0;display:flex;flex-direction:column;}
   #chart-wrap{flex:1;height:auto;min-height:0;}
   .s3-info{order:1;width:268px;flex-shrink:0;align-items:flex-start;overflow-y:auto;}
-  #r-cards{flex-direction:column;width:100%;}
   .scenario-toggle{width:100%;margin-top:0.75rem;}
   #wd-table{justify-content:flex-start;width:100%;}
+  .restart-btn{margin-top:0.75rem;}
 }
 .dot{width:8px;height:8px;border-radius:50%;background:var(--color-border-secondary);}
 .dot.done{background:#1D9E75;}.dot.active{background:var(--color-text-primary);}
@@ -157,7 +157,8 @@ const vLinePlugin={
       ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
       ctx.beginPath();ctx.arc(x,yPx,5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
       ctx.fillStyle=color;ctx.font='500 11px sans-serif';ctx.textAlign='center';
-      ctx.fillText(valLabel,x,yPx-12);
+      const labelY=yPx-12<ca.top+16?yPx+20:yPx-12;
+      ctx.fillText(valLabel,x,labelY);
       ctx.restore();
     });
   }
@@ -181,31 +182,31 @@ function buildChart(){
   const rCards=document.getElementById('r-cards');
   if(scenarioMode){
     rCards.innerHTML=`<div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-<div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:8px 10px;">
-  <div style="font-size:10px;color:#0F6E56;margin-bottom:3px;">好調（7%）65歳</div>
+<div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:6px 10px;">
+  <div style="font-size:10px;color:#0F6E56;margin-bottom:2px;">好調（7%）65歳</div>
   <div style="font-size:19px;font-weight:500;color:#0F6E56;">${fmt(fv(monthly,7,years*12))}</div>
 </div>
-<div style="background:#EEF4FB;border-radius:var(--border-radius-md);padding:8px 10px;">
-  <div style="font-size:10px;color:#2B6CB0;margin-bottom:3px;">普通（5%）65歳</div>
+<div style="background:#EEF4FB;border-radius:var(--border-radius-md);padding:6px 10px;">
+  <div style="font-size:10px;color:#2B6CB0;margin-bottom:2px;">普通（5%）65歳</div>
   <div style="font-size:19px;font-weight:500;color:#2B6CB0;">${fmt(fv(monthly,5,years*12))}</div>
 </div>
-<div style="background:#FAEEDA;border-radius:var(--border-radius-md);padding:8px 10px;">
-  <div style="font-size:10px;color:#854F0B;margin-bottom:3px;">不景気（2%）65歳</div>
+<div style="background:#FAEEDA;border-radius:var(--border-radius-md);padding:6px 10px;">
+  <div style="font-size:10px;color:#854F0B;margin-bottom:2px;">不景気（2%）65歳</div>
   <div style="font-size:19px;font-weight:500;color:#854F0B;">${fmt(fv(monthly,2,years*12))}</div>
 </div>
-<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px;">
-  <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:3px;">銀行（0.1%）65歳</div>
+<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:6px 10px;">
+  <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:2px;">銀行（0.1%）65歳</div>
   <div style="font-size:19px;font-weight:500;color:var(--color-text-secondary);">${fmt(fv(monthly,0.1,years*12))}</div>
 </div>
 </div>`;
   }else{
-    rCards.innerHTML=`<div style="flex:1;background:#E1F5EE;border-radius:var(--border-radius-lg);padding:14px 16px;text-align:left;">
-<div style="font-size:11px;color:#0F6E56;margin-bottom:4px;">NISAで積み立てたら（65歳・年5%）</div>
-<div style="font-size:26px;font-weight:500;color:#0F6E56;" id="r-nisa">${fmt(fv(monthly,5,years*12))}</div>
+    rCards.innerHTML=`<div style="flex:1;background:#E1F5EE;border-radius:var(--border-radius-lg);padding:10px 14px;text-align:left;">
+<div style="font-size:11px;color:#0F6E56;margin-bottom:3px;">NISAで積み立てたら（65歳・年5%）</div>
+<div style="font-size:22px;font-weight:500;color:#0F6E56;">${fmt(fv(monthly,5,years*12))}</div>
 </div>
-<div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;text-align:left;">
-<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;">銀行に預けたままなら（65歳）</div>
-<div style="font-size:26px;font-weight:500;color:var(--color-text-secondary);" id="r-bank">${fmt(fv(monthly,0.1,years*12))}</div>
+<div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px 14px;text-align:left;">
+<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:3px;">銀行に預けたままなら（65歳）</div>
+<div style="font-size:22px;font-weight:500;color:var(--color-text-secondary);">${fmt(fv(monthly,0.1,years*12))}</div>
 </div>`;
   }
 
@@ -217,11 +218,11 @@ function buildChart(){
     const rows=sorted.map(wa=>{
       const idx=wa-age-1;
       return `<tr>
-<td style="padding:4px 5px;color:var(--color-text-secondary);white-space:nowrap;">${wa-age}年後<br><span style="font-size:9px;">(${wa}歳)</span></td>
-<td style="padding:4px 5px;color:#1D9E75;font-weight:500;text-align:right;">${fmt(na2[idx]*10000)}</td>
-<td style="padding:4px 5px;color:#2B6CB0;font-weight:500;text-align:right;">${fmt(naArr[idx]*10000)}</td>
-<td style="padding:4px 5px;color:#BA7517;font-weight:500;text-align:right;">${fmt(na3[idx]*10000)}</td>
-<td style="padding:4px 5px;color:var(--color-text-secondary);text-align:right;">${fmt(baArr[idx]*10000)}</td>
+<td style="padding:3px 5px;color:var(--color-text-secondary);white-space:nowrap;">${wa-age}年後<br><span style="font-size:9px;">(${wa}歳)</span></td>
+<td style="padding:3px 5px;color:#1D9E75;font-weight:500;text-align:right;">${fmt(na2[idx]*10000)}</td>
+<td style="padding:3px 5px;color:#2B6CB0;font-weight:500;text-align:right;">${fmt(naArr[idx]*10000)}</td>
+<td style="padding:3px 5px;color:#BA7517;font-weight:500;text-align:right;">${fmt(na3[idx]*10000)}</td>
+<td style="padding:3px 5px;color:var(--color-text-secondary);text-align:right;">${fmt(baArr[idx]*10000)}</td>
 </tr>`;
     }).join('');
     const t=document.createElement('table');
@@ -238,7 +239,7 @@ function buildChart(){
     sorted.forEach((wa,i)=>{
       const idx=wa-age-1;
       const d=document.createElement('div');
-      d.style.cssText=`border-radius:var(--border-radius-md);padding:10px 14px;background:var(--color-background-secondary);text-align:center;min-width:120px;border-left:3px solid ${WD_COLS[i%4]};`;
+      d.style.cssText=`border-radius:var(--border-radius-md);padding:8px 12px;background:var(--color-background-secondary);text-align:center;min-width:120px;border-left:3px solid ${WD_COLS[i%4]};`;
       d.innerHTML=`<div style="font-size:11px;color:var(--color-text-secondary);">${wa-age}年後（${wa}歳）</div>
 <div style="font-size:17px;font-weight:500;color:${WD_COLS[i%4]};margin-top:3px;">${fmt(naArr[idx]*10000)}</div>
 <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">銀行: ${fmt(baArr[idx]*10000)}</div>`;
@@ -280,6 +281,7 @@ function buildChart(){
     data:{labels,datasets:currentDS},
     options:{
       responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:16}},
       animation:{duration:900,easing:'easeInOutQuart'},
       plugins:{
         legend:{display:false},
