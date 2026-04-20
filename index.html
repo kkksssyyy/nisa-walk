@@ -145,11 +145,9 @@ const vLinePlugin={
     const {ctx,chartArea:ca,scales}=ch;
     const lines=ch.config.options.plugins.vL?.lines||[];
     const n=ch.data.labels.length;
-    const bw=(ca.right-ca.left)/n;
-    lines.forEach(({idx,color,valLabel})=>{
+    lines.forEach(({idx,color,valLabel,yVal})=>{
       if(idx<0||idx>=n)return;
-      const x=ca.left+(idx+0.5)*bw;
-      const yVal=ch.data.datasets[0].data[idx];
+      const x=scales.x.getPixelForValue(idx);
       const yPx=scales.y.getPixelForValue(yVal);
       ctx.save();
       ctx.beginPath();ctx.moveTo(x,ca.top);ctx.lineTo(x,ca.bottom);
@@ -163,12 +161,11 @@ const vLinePlugin={
 };
 Chart.register(vLinePlugin);
 
-let naArr=[],baArr=[],labels=[];
+let naArr=[],baArr=[],na2=[],na3=[],labels=[];
 
 function buildChart(){
   const years=65-age;
-  labels=[];naArr=[];baArr=[];
-  const na2=[],na3=[];
+  labels=[];naArr=[];baArr=[];na2=[];na3=[];
   for(let y=1;y<=years;y++){
     const m=y*12;
     labels.push((age+y)%5===0||y===years?(age+y)+'歳':'');
@@ -182,16 +179,25 @@ function buildChart(){
   document.getElementById('r-bank').textContent=fmt(fv(monthly,0.1,years*12));
 
   const sorted=[...withdrawalAges].sort((a,b)=>a-b);
-  const vLines=sorted.map((wa,i)=>({idx:wa-age-1,color:WD_COLS[i%4],valLabel:fmt(naArr[wa-age-1]*10000)}));
+  const vLines=sorted.map((wa,i)=>({idx:wa-age-1,color:WD_COLS[i%4],valLabel:fmt(naArr[wa-age-1]*10000),yVal:naArr[wa-age-1]}));
 
   const tbl=document.getElementById('wd-table');tbl.innerHTML='';
   sorted.forEach((wa,i)=>{
     const idx=wa-age-1;
     const d=document.createElement('div');
-    d.style.cssText=`border-radius:var(--border-radius-md);padding:10px 14px;background:var(--color-background-secondary);text-align:center;min-width:120px;border-left:3px solid ${WD_COLS[i%4]};`;
-    d.innerHTML=`<div style="font-size:11px;color:var(--color-text-secondary);">${wa-age}年後（${wa}歳）</div>
+    if(scenarioMode){
+      d.style.cssText=`border-radius:var(--border-radius-md);padding:10px 14px;background:var(--color-background-secondary);text-align:left;min-width:150px;border-left:3px solid #888;`;
+      d.innerHTML=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;">${wa-age}年後（${wa}歳）</div>
+<div style="font-size:13px;font-weight:500;color:#1D9E75;">好調（7%）: ${fmt(na2[idx]*10000)}</div>
+<div style="font-size:13px;font-weight:500;color:#378ADD;margin-top:3px;">普通（5%）: ${fmt(naArr[idx]*10000)}</div>
+<div style="font-size:13px;font-weight:500;color:#BA7517;margin-top:3px;">不景気（2%）: ${fmt(na3[idx]*10000)}</div>
+<div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px;">銀行（0.1%）: ${fmt(baArr[idx]*10000)}</div>`;
+    }else{
+      d.style.cssText=`border-radius:var(--border-radius-md);padding:10px 14px;background:var(--color-background-secondary);text-align:center;min-width:120px;border-left:3px solid ${WD_COLS[i%4]};`;
+      d.innerHTML=`<div style="font-size:11px;color:var(--color-text-secondary);">${wa-age}年後（${wa}歳）</div>
 <div style="font-size:17px;font-weight:500;color:${WD_COLS[i%4]};margin-top:3px;">${fmt(naArr[idx]*10000)}</div>
 <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">銀行: ${fmt(baArr[idx]*10000)}</div>`;
+    }
     tbl.appendChild(d);
   });
 
