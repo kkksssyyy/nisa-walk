@@ -233,7 +233,7 @@ function buildChart(){
       plugins:{
         legend:{display:false},
         tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toLocaleString()+'万円'}},
-        vL:{lines:scenarioMode?[]:vLines}
+        vL:{lines:vLines}
       },
       scales:{
         x:{ticks:{autoSkip:false,maxRotation:0,font:{size:10},color:'#888'},grid:{display:false},border:{color:'rgba(128,128,128,0.2)'}},
@@ -242,7 +242,7 @@ function buildChart(){
     }
   });
 
-  document.getElementById('wd-table').style.display=scenarioMode?'none':'flex';
+  document.getElementById('wd-table').style.display='flex';
 }
 
 document.getElementById('next2').onclick=()=>{scenarioMode=false;show(3);buildChart();};
