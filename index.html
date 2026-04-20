@@ -87,16 +87,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="screen" id="s3">
   <div class="s3-info">
-    <div id="r-cards" style="display:flex;gap:10px;width:100%;margin-bottom:0.75rem;">
-      <div style="flex:1;background:#E1F5EE;border-radius:var(--border-radius-lg);padding:14px 16px;text-align:left;">
-        <div style="font-size:11px;color:#0F6E56;margin-bottom:4px;">NISAで積み立てたら（65歳・年5%）</div>
-        <div style="font-size:26px;font-weight:500;color:#0F6E56;" id="r-nisa">—</div>
-      </div>
-      <div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;text-align:left;">
-        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;">銀行に預けたままなら（65歳）</div>
-        <div style="font-size:26px;font-weight:500;color:var(--color-text-secondary);" id="r-bank">—</div>
-      </div>
-    </div>
+    <div id="r-cards" style="display:flex;gap:10px;width:100%;margin-bottom:0.75rem;"></div>
     <button class="scenario-toggle" id="scn-btn">
       <span id="scn-icon">☁</span>
       <span id="scn-label">不景気になったら？</span>
@@ -187,31 +178,73 @@ function buildChart(){
     baArr.push(Math.round(fv(monthly,0.1,m)/10000));
   }
 
-  document.getElementById('r-nisa').textContent=fmt(fv(monthly,5,years*12));
-  document.getElementById('r-bank').textContent=fmt(fv(monthly,0.1,years*12));
+  const rCards=document.getElementById('r-cards');
+  if(scenarioMode){
+    rCards.innerHTML=`<div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+<div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:8px 10px;">
+  <div style="font-size:10px;color:#0F6E56;margin-bottom:3px;">好調（7%）65歳</div>
+  <div style="font-size:19px;font-weight:500;color:#0F6E56;">${fmt(fv(monthly,7,years*12))}</div>
+</div>
+<div style="background:#EEF4FB;border-radius:var(--border-radius-md);padding:8px 10px;">
+  <div style="font-size:10px;color:#2B6CB0;margin-bottom:3px;">普通（5%）65歳</div>
+  <div style="font-size:19px;font-weight:500;color:#2B6CB0;">${fmt(fv(monthly,5,years*12))}</div>
+</div>
+<div style="background:#FAEEDA;border-radius:var(--border-radius-md);padding:8px 10px;">
+  <div style="font-size:10px;color:#854F0B;margin-bottom:3px;">不景気（2%）65歳</div>
+  <div style="font-size:19px;font-weight:500;color:#854F0B;">${fmt(fv(monthly,2,years*12))}</div>
+</div>
+<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px;">
+  <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:3px;">銀行（0.1%）65歳</div>
+  <div style="font-size:19px;font-weight:500;color:var(--color-text-secondary);">${fmt(fv(monthly,0.1,years*12))}</div>
+</div>
+</div>`;
+  }else{
+    rCards.innerHTML=`<div style="flex:1;background:#E1F5EE;border-radius:var(--border-radius-lg);padding:14px 16px;text-align:left;">
+<div style="font-size:11px;color:#0F6E56;margin-bottom:4px;">NISAで積み立てたら（65歳・年5%）</div>
+<div style="font-size:26px;font-weight:500;color:#0F6E56;" id="r-nisa">${fmt(fv(monthly,5,years*12))}</div>
+</div>
+<div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;text-align:left;">
+<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;">銀行に預けたままなら（65歳）</div>
+<div style="font-size:26px;font-weight:500;color:var(--color-text-secondary);" id="r-bank">${fmt(fv(monthly,0.1,years*12))}</div>
+</div>`;
+  }
 
   const sorted=[...withdrawalAges].sort((a,b)=>a-b);
   const vLines=sorted.map((wa,i)=>({idx:wa-age-1,color:WD_COLS[i%4],valLabel:fmt(naArr[wa-age-1]*10000),yVal:naArr[wa-age-1]}));
 
   const tbl=document.getElementById('wd-table');tbl.innerHTML='';
-  sorted.forEach((wa,i)=>{
-    const idx=wa-age-1;
-    const d=document.createElement('div');
-    if(scenarioMode){
-      d.style.cssText=`border-radius:var(--border-radius-md);padding:10px 14px;background:var(--color-background-secondary);text-align:left;min-width:150px;border-left:3px solid #888;`;
-      d.innerHTML=`<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;">${wa-age}年後（${wa}歳）</div>
-<div style="font-size:13px;font-weight:500;color:#1D9E75;">好調（7%）: ${fmt(na2[idx]*10000)}</div>
-<div style="font-size:13px;font-weight:500;color:#378ADD;margin-top:3px;">普通（5%）: ${fmt(naArr[idx]*10000)}</div>
-<div style="font-size:13px;font-weight:500;color:#BA7517;margin-top:3px;">不景気（2%）: ${fmt(na3[idx]*10000)}</div>
-<div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px;">銀行（0.1%）: ${fmt(baArr[idx]*10000)}</div>`;
-    }else{
+  if(scenarioMode&&sorted.length>0){
+    const rows=sorted.map(wa=>{
+      const idx=wa-age-1;
+      return `<tr>
+<td style="padding:4px 5px;color:var(--color-text-secondary);white-space:nowrap;">${wa-age}年後<br><span style="font-size:9px;">(${wa}歳)</span></td>
+<td style="padding:4px 5px;color:#1D9E75;font-weight:500;text-align:right;">${fmt(na2[idx]*10000)}</td>
+<td style="padding:4px 5px;color:#2B6CB0;font-weight:500;text-align:right;">${fmt(naArr[idx]*10000)}</td>
+<td style="padding:4px 5px;color:#BA7517;font-weight:500;text-align:right;">${fmt(na3[idx]*10000)}</td>
+<td style="padding:4px 5px;color:var(--color-text-secondary);text-align:right;">${fmt(baArr[idx]*10000)}</td>
+</tr>`;
+    }).join('');
+    const t=document.createElement('table');
+    t.style.cssText='width:100%;border-collapse:collapse;font-size:11px;';
+    t.innerHTML=`<thead><tr>
+<th style="padding:3px 5px;font-size:10px;color:var(--color-text-secondary);text-align:left;font-weight:500;">時期</th>
+<th style="padding:3px 5px;font-size:10px;color:#1D9E75;text-align:right;">好調7%</th>
+<th style="padding:3px 5px;font-size:10px;color:#2B6CB0;text-align:right;">普通5%</th>
+<th style="padding:3px 5px;font-size:10px;color:#BA7517;text-align:right;">不景気2%</th>
+<th style="padding:3px 5px;font-size:10px;color:var(--color-text-secondary);text-align:right;">銀行</th>
+</tr></thead><tbody>${rows}</tbody>`;
+    tbl.appendChild(t);
+  }else{
+    sorted.forEach((wa,i)=>{
+      const idx=wa-age-1;
+      const d=document.createElement('div');
       d.style.cssText=`border-radius:var(--border-radius-md);padding:10px 14px;background:var(--color-background-secondary);text-align:center;min-width:120px;border-left:3px solid ${WD_COLS[i%4]};`;
       d.innerHTML=`<div style="font-size:11px;color:var(--color-text-secondary);">${wa-age}年後（${wa}歳）</div>
 <div style="font-size:17px;font-weight:500;color:${WD_COLS[i%4]};margin-top:3px;">${fmt(naArr[idx]*10000)}</div>
 <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">銀行: ${fmt(baArr[idx]*10000)}</div>`;
-    }
-    tbl.appendChild(d);
-  });
+      tbl.appendChild(d);
+    });
+  }
 
   const normalDatasets=[
     {label:'NISA（年5%）',data:naArr,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.1)',fill:true,tension:0.35,borderWidth:2.5,pointRadius:0},
