@@ -275,6 +275,9 @@ function reset() {
   });
   document.getElementById('sb1').classList.add('active');
   document.getElementById('sb1').disabled = false;
+  document.querySelectorAll('.amt-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.v === String(monthly));
+  });
 }
 </script>
 </body>
