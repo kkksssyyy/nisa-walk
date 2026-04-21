@@ -274,27 +274,25 @@ function doStep4() {
   const periodLabel = periods === 60 ? '5年後' : periods === 120 ? '10年後' : periods === 180 ? '15年後' : `${periods}ヶ月後`;
   document.getElementById('result-title').textContent = `${periodLabel}の比較`;
 
-  const diff = calcBResult.total - calcAResult.total;
   const avgDiff = calcAResult.avg - calcBResult.avg;
-  const bWins = diff > 0;
 
   const winner = document.getElementById('winner');
-  winner.style.background = bWins ? '#E1F5EE' : '#FEF3C7';
+  winner.style.background = '#E1F5EE';
   const wMain = document.getElementById('winner-main');
   const wSub = document.getElementById('winner-sub');
-  wMain.style.color = bWins ? '#0F6E56' : '#92400E';
-  wSub.style.color = bWins ? '#1D9E75' : '#B45309';
-  wMain.textContent = bWins
-    ? `定額購入で${diff.toLocaleString()}個多く買えた！`
-    : `今回は定量購入が${Math.abs(diff).toLocaleString()}個多い`;
-  wSub.textContent = bWins
-    ? `平均単価が${avgDiff}円お得`
-    : `相場によっては定量が有利なこともあります`;
+  wMain.style.color = '#0F6E56';
+  wSub.style.color = '#1D9E75';
+  wMain.textContent = avgDiff > 0
+    ? `定額購入の平均単価が${avgDiff}円安い！`
+    : `今回は平均単価が同じでした`;
+  wSub.textContent = avgDiff > 0
+    ? `同じ金額でより効率よく買えました`
+    : `価格変動がなければ差は出ません`;
 
-  document.getElementById('r-total-a').className = `result-val${bWins ? '' : ' green'}`;
-  document.getElementById('r-total-b').className = `result-val${bWins ? ' green' : ''}`;
-  document.getElementById('r-avg-a').className = `result-val${bWins ? '' : ' green'}`;
-  document.getElementById('r-avg-b').className = `result-val${bWins ? ' green' : ''}`;
+  document.getElementById('r-total-a').className = 'result-val';
+  document.getElementById('r-total-b').className = 'result-val';
+  document.getElementById('r-avg-a').className = 'result-val';
+  document.getElementById('r-avg-b').className = 'result-val green';
 
   document.getElementById('result-card').classList.add('visible');
   setStepDone(4);
