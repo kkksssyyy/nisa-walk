@@ -3,324 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NISAシミュレーター</title>
+<title>営業ツール</title>
 <style>
-:root{
-  --color-text-primary:#1A1A1A;
-  --color-text-secondary:#6B6B6B;
-  --color-background-primary:#FFFFFF;
-  --color-background-secondary:#F5F5F5;
-  --color-background-tertiary:#EBEBEB;
-  --color-border-secondary:#D4D4D4;
-  --color-border-tertiary:#E0E0E0;
-  --border-radius-lg:12px;
-  --border-radius-md:8px;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--color-background-primary);color:var(--color-text-primary);}
 *{box-sizing:border-box;margin:0;padding:0;}
-.screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:400px;padding:2rem 1rem;text-align:center;}
-.screen.active{display:flex;}
-.q{font-size:26px;font-weight:500;color:var(--color-text-primary);margin-bottom:1.5rem;line-height:1.4;}
-.next-btn{padding:13px 44px;font-size:15px;border-radius:999px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;cursor:pointer;font-weight:500;margin-top:2rem;}
-.next-btn:hover{opacity:.8;}
-.restart-btn{padding:9px 24px;font-size:13px;border-radius:999px;background:transparent;color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);cursor:pointer;margin-top:1.25rem;}
-.restart-btn:hover{background:var(--color-background-secondary);}
-.age-btn{width:52px;height:52px;border-radius:50%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);font-size:22px;cursor:pointer;color:var(--color-text-primary);}
-.age-btn:hover{background:var(--color-background-tertiary);}
-.amt-btn{padding:18px 8px;border-radius:var(--border-radius-lg);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);font-size:15px;font-weight:500;cursor:pointer;color:var(--color-text-primary);line-height:1.4;}
-.amt-btn.on{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56;}
-.chip{padding:9px 16px;border-radius:999px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);font-size:13px;cursor:pointer;color:var(--color-text-secondary);}
-.chip.on{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56;font-weight:500;}
-.dots{display:flex;gap:8px;margin-bottom:2rem;justify-content:center;}
-#chart-wrap{position:relative;width:100%;height:230px;}
-.s3-chart{order:1;width:100%;display:flex;flex-direction:column;}
-.s3-info{order:0;width:100%;display:flex;flex-direction:column;align-items:center;}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--color-border-secondary);}
-.dot.done{background:#1D9E75;}.dot.active{background:var(--color-text-primary);}
-.scenario-toggle{display:flex;align-items:center;gap:10px;padding:11px 20px;border-radius:999px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);cursor:pointer;font-size:14px;color:var(--color-text-secondary);margin-top:1rem;}
-.scenario-toggle.on{background:#FAEEDA;border-color:#BA7517;color:#854F0B;}
-.scenario-toggle:hover{background:var(--color-background-tertiary);}
-.scenario-toggle.on:hover{background:#FAC775;}
-@media(min-width:768px){
-  #s3{flex-direction:row;align-items:stretch;gap:28px;padding:0.75rem 0;height:435px;}
-  .s3-chart{order:0;flex:1;min-width:0;display:flex;flex-direction:column;}
-  #chart-wrap{flex:1;height:auto;min-height:0;}
-  .s3-info{order:1;width:268px;flex-shrink:0;align-items:flex-start;overflow-y:auto;}
-  .scenario-toggle{margin-top:0;padding:9px 8px;font-size:12px;gap:6px;justify-content:center;}
-  #scn-icon{display:none;}
-  #btn-row{align-items:stretch;}
-  #wd-table{justify-content:flex-start;width:100%;}
-}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F5F5;color:#1A1A1A;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.wrap{width:100%;max-width:960px;padding:2rem 1.5rem;}
+.logo{font-size:13px;color:#6B6B6B;margin-bottom:2.5rem;text-align:center;letter-spacing:0.05em;}
+.title{font-size:28px;font-weight:600;text-align:center;margin-bottom:0.5rem;}
+.subtitle{font-size:14px;color:#6B6B6B;text-align:center;margin-bottom:3rem;}
+.cards{display:flex;flex-direction:column;gap:16px;}
+@media(min-width:768px){.cards{flex-direction:row;gap:20px;}}
+.card{flex:1;background:#fff;border-radius:16px;border:1.5px solid #E0E0E0;padding:28px 24px;text-decoration:none;color:#1A1A1A;display:flex;flex-direction:column;gap:12px;transition:border-color 0.15s,box-shadow 0.15s;}
+.card:hover{border-color:#1D9E75;box-shadow:0 4px 16px rgba(29,158,117,0.12);}
+.card-icon{font-size:32px;line-height:1;}
+.card-name{font-size:17px;font-weight:600;}
+.card-desc{font-size:13px;color:#6B6B6B;line-height:1.6;}
+.card-tag{display:inline-block;font-size:11px;padding:3px 10px;border-radius:99px;font-weight:600;margin-top:auto;}
+.tag-green{background:#E1F5EE;color:#0F6E56;}
+.tag-gray{background:#F0F0F0;color:#6B6B6B;}
+.card-arrow{font-size:18px;color:#1D9E75;align-self:flex-end;margin-top:4px;}
 </style>
 </head>
 <body>
-
-<h2 class="sr-only">NISAシミュレーター ステップ式</h2>
-
-<div style="padding:1.5rem 1.5rem 1rem;max-width:960px;margin:0 auto;">
-<div class="dots"><div class="dot active" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
-
-<div class="screen active" id="s1">
-  <div class="q">今、おいくつですか？</div>
-  <div style="display:flex;align-items:center;gap:24px;">
-    <button class="age-btn" id="aminus">−</button>
-    <div style="font-size:80px;font-weight:500;color:var(--color-text-primary);line-height:1;margin:0.5rem 0;min-width:120px;" id="adisp">30</div>
-    <button class="age-btn" id="aplus">＋</button>
-  </div>
-  <div style="font-size:14px;color:var(--color-text-secondary);margin-top:0.75rem;" id="age-sub">65歳まであと <strong>35年</strong> あります</div>
-  <button class="next-btn" id="next1">次へ →</button>
-</div>
-
-<div class="screen" id="s2">
-  <div class="q">毎月いくら積み立てますか？</div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:560px;">
-    <button class="amt-btn" data-v="10000">1万円</button>
-    <button class="amt-btn on" data-v="30000">3万円</button>
-    <button class="amt-btn" data-v="50000">5万円</button>
-    <button class="amt-btn" data-v="100000">10万円<br><span style="font-size:10px;opacity:.65;font-weight:400;">（上限）</span></button>
-  </div>
-  <div style="margin-top:2rem;width:100%;max-width:560px;text-align:left;">
-    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">引き出すとしたら、いつ頃ですか？（複数選べます）</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;" id="chip-area"></div>
-  </div>
-  <button class="next-btn" id="next2">結果を見る →</button>
-</div>
-
-<div class="screen" id="s3">
-  <div class="s3-info">
-    <div id="r-cards" style="display:flex;gap:10px;width:100%;margin-bottom:0.75rem;"></div>
-    <div id="wd-table" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:0;width:100%;justify-content:center;"></div>
-    <div id="btn-row" style="display:flex;gap:8px;margin-top:0.75rem;width:100%;">
-      <button class="scenario-toggle" id="scn-btn" style="flex:1;margin-top:0;">
-        <span id="scn-icon">☁</span>
-        <span id="scn-label">不景気になったら？</span>
-      </button>
-      <button class="restart-btn" id="restart" style="flex:1;margin-top:0;padding:9px 10px;font-size:12px;">↺ もう一度試す</button>
-    </div>
-  </div>
-  <div class="s3-chart">
-    <div id="chart-wrap">
-      <canvas id="chart" role="img" aria-label="NISAと銀行預金の資産推移比較">NISAと銀行預金の資産推移比較</canvas>
-    </div>
-    <div id="legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--color-text-secondary);justify-content:center;"></div>
+<div class="wrap">
+  <div class="logo">NISA WALK</div>
+  <div class="title">どこから始めますか？</div>
+  <div class="subtitle">お客さまの状況に合わせてツールを選んでください</div>
+  <div class="cards">
+    <a class="card" href="dca-a.html">
+      <div class="card-icon">🍎</div>
+      <div class="card-name">ドルコスト平均法とは？</div>
+      <div class="card-desc">リンゴの例えで「毎月同じ金額で買い続けるとお得な理由」をひと目で見せる</div>
+      <div class="card-tag tag-green">NISAをまだ知らない方へ</div>
+      <div class="card-arrow">→</div>
+    </a>
+    <a class="card" href="dca-b.html">
+      <div class="card-icon">🍎</div>
+      <div class="card-name">ドルコスト平均法とは？（ステップ解説）</div>
+      <div class="card-desc">順番に説明しながら一緒に理解する。営業マンが会話のテンポをコントロールしやすい</div>
+      <div class="card-tag tag-green">NISAをまだ知らない方へ</div>
+      <div class="card-arrow">→</div>
+    </a>
+    <a class="card" href="simulator.html">
+      <div class="card-icon">📈</div>
+      <div class="card-name">NISAシミュレーター</div>
+      <div class="card-desc">年齢・積立額を入力して複利の効果をグラフで確認する。複数のシナリオも比較できる</div>
+      <div class="card-tag tag-gray">NISAに興味がある方へ</div>
+      <div class="card-arrow">→</div>
+    </a>
   </div>
 </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-let age=30,monthly=30000;
-let withdrawalAges=new Set();
-let chart,scenarioMode=false;
-const WD_COLS=['#5DCAA5','#1D9E75','#0F6E56','#085041'];
-
-function fv(mo,rate,months){const r=rate/100/12;return r===0?mo*months:mo*((Math.pow(1+r,months)-1)/r);}
-function fmt(y){const m=Math.round(y/10000);return m>=10000?(m/10000).toFixed(1)+'億円':m.toLocaleString()+'万円';}
-function setDots(s){[1,2,3].forEach(i=>{const d=document.getElementById('d'+i);d.className='dot'+(i<s?' done':i===s?' active':'');});}
-function show(n){['s1','s2','s3'].forEach((id,i)=>document.getElementById(id).classList.toggle('active',i+1===n));setDots(n);}
-
-function updAge(){
-  document.getElementById('adisp').textContent=age;
-  document.getElementById('age-sub').innerHTML=`65歳まであと <strong>${65-age}年</strong> あります`;
-}
-document.getElementById('aminus').onclick=()=>{if(age>20){age--;updAge();}};
-document.getElementById('aplus').onclick=()=>{if(age<60){age++;updAge();}};
-
-document.querySelectorAll('.amt-btn').forEach(b=>{
-  b.onclick=()=>{document.querySelectorAll('.amt-btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');monthly=+b.dataset.v;};
-});
-
-function buildChips(){
-  const area=document.getElementById('chip-area');area.innerHTML='';withdrawalAges.clear();
-  const opts=[];
-  [5,10,15].forEach(y=>{const wa=age+y;if(wa<65)opts.push({label:`${y}年後（${wa}歳）`,a:wa});});
-  opts.push({label:'65歳まで',a:65,fixed:true});
-  opts.forEach(({label,a,fixed})=>{
-    withdrawalAges.add(a);
-    const c=document.createElement('button');c.className='chip on';c.textContent=label;c.dataset.a=a;
-    if(!fixed){c.onclick=()=>{c.classList.toggle('on');withdrawalAges[c.classList.contains('on')?'add':'delete'](a);};}
-    else{c.style.cursor='default';c.style.opacity='.75';}
-    area.appendChild(c);
-  });
-}
-document.getElementById('next1').onclick=()=>{buildChips();show(2);};
-
-const vLinePlugin={
-  id:'vL',
-  afterDraw(ch){
-    const {ctx,chartArea:ca,scales}=ch;
-    const lines=ch.config.options.plugins.vL?.lines||[];
-    const n=ch.data.labels.length;
-    lines.forEach(({idx,color,valLabel,yVal})=>{
-      if(idx<0||idx>=n)return;
-      const x=scales.x.getPixelForValue(idx);
-      const yPx=scales.y.getPixelForValue(yVal);
-      ctx.save();
-      ctx.beginPath();ctx.moveTo(x,ca.top);ctx.lineTo(x,ca.bottom);
-      ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
-      ctx.beginPath();ctx.arc(x,yPx,5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
-      ctx.fillStyle=color;ctx.font='500 11px sans-serif';ctx.textAlign='center';
-      const labelY=yPx-12<ca.top+16?yPx+20:yPx-12;
-      ctx.fillText(valLabel,x,labelY);
-      ctx.restore();
-    });
-  }
-};
-Chart.register(vLinePlugin);
-
-let naArr=[],baArr=[],na2=[],na3=[],labels=[];
-
-function buildChart(){
-  const years=65-age;
-  labels=[];naArr=[];baArr=[];na2=[];na3=[];
-  for(let y=1;y<=years;y++){
-    const m=y*12;
-    labels.push((age+y)%5===0||y===years?(age+y)+'歳':'');
-    naArr.push(Math.round(fv(monthly,5,m)/10000));
-    na2.push(Math.round(fv(monthly,7,m)/10000));
-    na3.push(Math.round(fv(monthly,2,m)/10000));
-    baArr.push(Math.round(fv(monthly,0.1,m)/10000));
-  }
-
-  const rCards=document.getElementById('r-cards');
-  if(scenarioMode){
-    rCards.innerHTML=`<div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-<div style="background:#E1F5EE;border-radius:var(--border-radius-md);padding:6px 10px;">
-  <div style="font-size:10px;color:#0F6E56;margin-bottom:2px;">好調（7%）65歳</div>
-  <div style="font-size:19px;font-weight:500;color:#0F6E56;">${fmt(fv(monthly,7,years*12))}</div>
-</div>
-<div style="background:#EEF4FB;border-radius:var(--border-radius-md);padding:6px 10px;">
-  <div style="font-size:10px;color:#2B6CB0;margin-bottom:2px;">普通（5%）65歳</div>
-  <div style="font-size:19px;font-weight:500;color:#2B6CB0;">${fmt(fv(monthly,5,years*12))}</div>
-</div>
-<div style="background:#FAEEDA;border-radius:var(--border-radius-md);padding:6px 10px;">
-  <div style="font-size:10px;color:#854F0B;margin-bottom:2px;">不景気（2%）65歳</div>
-  <div style="font-size:19px;font-weight:500;color:#854F0B;">${fmt(fv(monthly,2,years*12))}</div>
-</div>
-<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:6px 10px;">
-  <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:2px;">銀行（0.1%）65歳</div>
-  <div style="font-size:19px;font-weight:500;color:var(--color-text-secondary);">${fmt(fv(monthly,0.1,years*12))}</div>
-</div>
-</div>`;
-  }else{
-    rCards.innerHTML=`<div style="flex:1;background:#E1F5EE;border-radius:var(--border-radius-lg);padding:10px 14px;text-align:left;">
-<div style="font-size:11px;color:#0F6E56;margin-bottom:3px;">NISAで積み立てたら（65歳・年5%）</div>
-<div style="font-size:22px;font-weight:500;color:#0F6E56;">${fmt(fv(monthly,5,years*12))}</div>
-</div>
-<div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:10px 14px;text-align:left;">
-<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:3px;">銀行に預けたままなら（65歳）</div>
-<div style="font-size:22px;font-weight:500;color:var(--color-text-secondary);">${fmt(fv(monthly,0.1,years*12))}</div>
-</div>`;
-  }
-
-  const sorted=[...withdrawalAges].sort((a,b)=>a-b);
-  const vLines=sorted.map((wa,i)=>({idx:wa-age-1,color:WD_COLS[i%4],valLabel:fmt(naArr[wa-age-1]*10000),yVal:naArr[wa-age-1]}));
-
-  const tbl=document.getElementById('wd-table');tbl.innerHTML='';
-  if(scenarioMode&&sorted.length>0){
-    const rows=sorted.map(wa=>{
-      const idx=wa-age-1;
-      return `<tr>
-<td style="padding:3px 5px;color:var(--color-text-secondary);white-space:nowrap;">${wa-age}年後<br><span style="font-size:9px;">(${wa}歳)</span></td>
-<td style="padding:3px 5px;color:#1D9E75;font-weight:500;text-align:right;">${fmt(na2[idx]*10000)}</td>
-<td style="padding:3px 5px;color:#2B6CB0;font-weight:500;text-align:right;">${fmt(naArr[idx]*10000)}</td>
-<td style="padding:3px 5px;color:#BA7517;font-weight:500;text-align:right;">${fmt(na3[idx]*10000)}</td>
-<td style="padding:3px 5px;color:var(--color-text-secondary);text-align:right;">${fmt(baArr[idx]*10000)}</td>
-</tr>`;
-    }).join('');
-    const t=document.createElement('table');
-    t.style.cssText='width:100%;border-collapse:collapse;font-size:11px;';
-    t.innerHTML=`<thead><tr>
-<th style="padding:3px 5px;font-size:10px;color:var(--color-text-secondary);text-align:left;font-weight:500;">時期</th>
-<th style="padding:3px 5px;font-size:10px;color:#1D9E75;text-align:right;">好調7%</th>
-<th style="padding:3px 5px;font-size:10px;color:#2B6CB0;text-align:right;">普通5%</th>
-<th style="padding:3px 5px;font-size:10px;color:#BA7517;text-align:right;">不景気2%</th>
-<th style="padding:3px 5px;font-size:10px;color:var(--color-text-secondary);text-align:right;">銀行</th>
-</tr></thead><tbody>${rows}</tbody>`;
-    tbl.appendChild(t);
-  }else{
-    sorted.forEach((wa,i)=>{
-      const idx=wa-age-1;
-      const d=document.createElement('div');
-      d.style.cssText=`border-radius:var(--border-radius-md);padding:8px 12px;background:var(--color-background-secondary);text-align:center;min-width:120px;border-left:3px solid ${WD_COLS[i%4]};`;
-      d.innerHTML=`<div style="font-size:11px;color:var(--color-text-secondary);">${wa-age}年後（${wa}歳）</div>
-<div style="font-size:17px;font-weight:500;color:${WD_COLS[i%4]};margin-top:3px;">${fmt(naArr[idx]*10000)}</div>
-<div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">銀行: ${fmt(baArr[idx]*10000)}</div>`;
-      tbl.appendChild(d);
-    });
-  }
-
-  const normalDatasets=[
-    {label:'NISA（年5%）',data:naArr,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.1)',fill:true,tension:0.35,borderWidth:2.5,pointRadius:0},
-    {label:'銀行預金',data:baArr,borderColor:'#B4B2A9',backgroundColor:'transparent',fill:false,tension:0.2,borderWidth:1.5,borderDash:[5,4],pointRadius:0}
-  ];
-
-  const scenarioDatasets=[
-    {label:'好調（年7%）',data:na2,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.07)',fill:true,tension:0.35,borderWidth:2,pointRadius:0},
-    {label:'普通（年5%）',data:naArr,borderColor:'#378ADD',backgroundColor:'transparent',fill:false,tension:0.35,borderWidth:2,borderDash:[],pointRadius:0},
-    {label:'不景気（年2%）',data:na3,borderColor:'#BA7517',backgroundColor:'transparent',fill:false,tension:0.35,borderWidth:2,borderDash:[4,3],pointRadius:0},
-    {label:'銀行預金（0.1%）',data:baArr,borderColor:'#B4B2A9',backgroundColor:'transparent',fill:false,tension:0.2,borderWidth:1.5,borderDash:[5,4],pointRadius:0}
-  ];
-
-  function buildLegend(datasets){
-    const el=document.getElementById('legend');el.innerHTML='';
-    datasets.forEach(ds=>{
-      const span=document.createElement('span');
-      span.style.cssText='display:flex;align-items:center;gap:5px;';
-      const dot=document.createElement('span');
-      dot.style.cssText=`width:20px;height:3px;background:${ds.borderColor};border-radius:2px;display:inline-block;${ds.borderDash?.length?'background:none;border-top:2px dashed '+ds.borderColor+';':''}`;
-      span.appendChild(dot);
-      const txt=document.createElement('span');txt.textContent=ds.label;
-      span.appendChild(txt);el.appendChild(span);
-    });
-  }
-
-  if(chart)chart.destroy();
-  const currentDS=scenarioMode?scenarioDatasets:normalDatasets;
-  buildLegend(currentDS);
-
-  chart=new Chart(document.getElementById('chart'),{
-    type:'line',
-    data:{labels,datasets:currentDS},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      layout:{padding:{top:16}},
-      animation:{duration:900,easing:'easeInOutQuart'},
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toLocaleString()+'万円'}},
-        vL:{lines:vLines}
-      },
-      scales:{
-        x:{ticks:{autoSkip:false,maxRotation:0,font:{size:10},color:'#888'},grid:{display:false},border:{color:'rgba(128,128,128,0.2)'}},
-        y:{ticks:{callback:v=>v.toLocaleString()+'万',font:{size:10},color:'#888'},grid:{color:'rgba(128,128,128,0.1)'},border:{display:false}}
-      }
-    }
-  });
-
-  document.getElementById('wd-table').style.display='flex';
-}
-
-document.getElementById('next2').onclick=()=>{scenarioMode=false;show(3);buildChart();};
-
-document.getElementById('scn-btn').onclick=()=>{
-  scenarioMode=!scenarioMode;
-  const btn=document.getElementById('scn-btn');
-  btn.classList.toggle('on',scenarioMode);
-  document.getElementById('scn-icon').textContent=scenarioMode?'☀':'☁';
-  document.getElementById('scn-label').textContent=scenarioMode?'通常シナリオに戻す':'不景気になったら？';
-  buildChart();
-};
-
-document.getElementById('restart').onclick=()=>{
-  age=30;monthly=30000;scenarioMode=false;updAge();
-  document.querySelectorAll('.amt-btn').forEach(b=>b.classList.toggle('on',b.dataset.v==='30000'));
-  document.getElementById('scn-btn').classList.remove('on');
-  document.getElementById('scn-icon').textContent='☁';
-  document.getElementById('scn-label').textContent='不景気になったら？';
-  show(1);
-};
-updAge();
-</script>
 </body>
 </html>
