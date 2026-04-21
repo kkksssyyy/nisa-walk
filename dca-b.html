@@ -93,9 +93,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div style="font-size:12px;color:#888;margin-bottom:8px;">シミュレーション期間</div>
         <div class="sel-row">
           <button class="sel-btn on" data-period="6">6ヶ月</button>
-          <button class="sel-btn" data-period="12">1年</button>
-          <button class="sel-btn" data-period="24">2年</button>
-          <button class="sel-btn" data-period="36">3年</button>
+          <button class="sel-btn" data-period="60">5年</button>
+          <button class="sel-btn" data-period="120">10年</button>
+          <button class="sel-btn" data-period="180">15年</button>
         </div>
       </div>
 
@@ -187,10 +187,11 @@ function makeGroups(counts, prices, n) {
     const p = prices.slice(g * size, (g + 1) * size);
     const total = c.reduce((s, v) => s + v, 0);
     const avgP = Math.round(p.reduce((s, v) => s + v, 0) / p.length);
+    const end = (g + 1) * size;
     let label;
     if (size === 1) label = `${g+1}月`;
-    else if (n === 12) label = `${g*size+1}-${(g+1)*size}月`;
-    else label = `${g*size+1}-${(g+1)*size}ヶ月`;
+    else if (end % 12 === 0) label = `${end/12}年`;
+    else label = `${end}ヶ月`;
     return { total, avgP, label };
   });
 }
@@ -270,7 +271,7 @@ function doStep4() {
   document.getElementById('r-avg-a').textContent = `${calcAResult.avg}円`;
   document.getElementById('r-avg-b').textContent = `${calcBResult.avg}円`;
 
-  const periodLabel = periods === 12 ? '1年後' : periods === 24 ? '2年後' : periods === 36 ? '3年後' : `${periods}ヶ月後`;
+  const periodLabel = periods === 60 ? '5年後' : periods === 120 ? '10年後' : periods === 180 ? '15年後' : `${periods}ヶ月後`;
   document.getElementById('result-title').textContent = `${periodLabel}の比較`;
 
   const diff = calcBResult.total - calcAResult.total;
