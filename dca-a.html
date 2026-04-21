@@ -132,8 +132,7 @@ function randomPrices(n) {
 }
 
 function calcA(monthly, prices) {
-  const avgAllPrices = Math.round(prices.reduce((s,p)=>s+p,0)/prices.length);
-  const qty = Math.round(monthly / avgAllPrices);
+  const qty = Math.round(monthly / prices[0]);
   const n = prices.length;
   const total = qty * n;
   const spend = prices.reduce((s, p) => s + qty * p, 0);
