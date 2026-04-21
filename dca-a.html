@@ -31,9 +31,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* 右：操作カラム */
 .right{width:100%;display:flex;flex-direction:column;gap:12px;}
 @media(min-width:768px){.right{width:268px;flex-shrink:0;}}
-.amt-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-.amt-btn{padding:12px 4px;border-radius:10px;background:#F5F5F5;border:0.5px solid #E0E0E0;font-size:13px;font-weight:500;cursor:pointer;color:#1A1A1A;line-height:1.3;text-align:center;}
-.amt-btn.on{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56;}
+.sel-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.sel-btn{padding:12px 4px;border-radius:10px;background:#F5F5F5;border:0.5px solid #E0E0E0;font-size:13px;font-weight:500;cursor:pointer;color:#1A1A1A;line-height:1.3;text-align:center;}
+.sel-btn.on{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56;}
 .gen-btn{padding:13px;border-radius:99px;background:#1D9E75;color:#fff;border:none;font-size:15px;font-weight:600;cursor:pointer;width:100%;}
 .gen-btn:hover{opacity:.85;}
 .result-card{border:1.5px solid #E0E0E0;border-radius:12px;padding:14px;flex:1;display:flex;flex-direction:column;gap:0;}
@@ -75,16 +75,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="right">
       <div>
         <div style="font-size:12px;color:#888;margin-bottom:8px;">毎月の購入金額</div>
-        <div class="amt-row" id="amt-row">
-          <button class="amt-btn" data-v="10000">1万円</button>
-          <button class="amt-btn on" data-v="30000">3万円</button>
-          <button class="amt-btn" data-v="50000">5万円</button>
-          <button class="amt-btn" data-v="100000">10万円</button>
+        <div class="sel-row">
+          <button class="sel-btn" data-amt="10000">1万円</button>
+          <button class="sel-btn on" data-amt="30000">3万円</button>
+          <button class="sel-btn" data-amt="50000">5万円</button>
+          <button class="sel-btn" data-amt="100000">10万円</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#888;margin-bottom:8px;">シミュレーション期間</div>
+        <div class="sel-row">
+          <button class="sel-btn on" data-period="6">6ヶ月</button>
+          <button class="sel-btn" data-period="12">1年</button>
+          <button class="sel-btn" data-period="24">2年</button>
+          <button class="sel-btn" data-period="36">3年</button>
         </div>
       </div>
       <button class="gen-btn" id="gen-btn">🎲 相場をランダムに作る</button>
       <div class="result-card hidden" id="result-card">
-        <div class="result-title">6ヶ月後の比較</div>
+        <div class="result-title" id="result-title">6ヶ月後の比較</div>
         <div class="result-row"><span>定量購入の合計</span><span class="result-val" id="r-total-a">—</span></div>
         <div class="result-row"><span>定額購入の合計</span><span class="result-val green" id="r-total-b">—</span></div>
         <div class="result-row"><span>平均単価（定量）</span><span class="result-val" id="r-avg-a">—</span></div>
@@ -100,33 +109,60 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 <script>
 let monthly = 30000;
+let periods = 6;
 
-document.querySelectorAll('.amt-btn').forEach(b => {
+document.querySelectorAll('[data-amt]').forEach(b => {
   b.onclick = () => {
-    document.querySelectorAll('.amt-btn').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('[data-amt]').forEach(x => x.classList.remove('on'));
     b.classList.add('on');
-    monthly = +b.dataset.v;
+    monthly = +b.dataset.amt;
   };
 });
 
-function randomPrices() {
-  return Array.from({length: 6}, () => Math.floor(Math.random() * 151) + 50);
+document.querySelectorAll('[data-period]').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('[data-period]').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    periods = +b.dataset.period;
+  };
+});
+
+function randomPrices(n) {
+  return Array.from({length: n}, () => Math.floor(Math.random() * 151) + 50);
 }
 
 function calcA(monthly, prices) {
-  const qty = Math.round(monthly / prices[0]);
-  const total = qty * 6;
+  const avgAllPrices = Math.round(prices.reduce((s,p)=>s+p,0)/prices.length);
+  const qty = Math.round(monthly / avgAllPrices);
+  const n = prices.length;
+  const total = qty * n;
   const spend = prices.reduce((s, p) => s + qty * p, 0);
   const avg = Math.round(spend / total);
-  return { qty, total, spend, avg, counts: Array(6).fill(qty) };
+  return { qty, total, spend, avg, counts: Array(n).fill(qty) };
 }
 
 function calcB(monthly, prices) {
   const counts = prices.map(p => Math.floor(monthly / p));
-  const total = counts.reduce((s, n) => s + n, 0);
-  const spend = monthly * 6;
+  const total = counts.reduce((s, x) => s + x, 0);
+  const spend = monthly * prices.length;
   const avg = Math.round(spend / total);
   return { total, spend, avg, counts };
+}
+
+// Group n months of data into 6 visual columns
+function makeGroups(counts, prices, n) {
+  const size = n / 6;
+  return Array.from({length: 6}, (_, g) => {
+    const c = counts.slice(g * size, (g + 1) * size);
+    const p = prices.slice(g * size, (g + 1) * size);
+    const total = c.reduce((s, v) => s + v, 0);
+    const avgP = Math.round(p.reduce((s, v) => s + v, 0) / p.length);
+    let label;
+    if (size === 1) label = `${g+1}月`;
+    else if (n === 12) label = `${g*size+1}-${(g+1)*size}月`;
+    else label = `${g*size+1}-${(g+1)*size}ヶ月`;
+    return { total, avgP, label };
+  });
 }
 
 function appleHtmlScaled(count, maxCount) {
@@ -134,43 +170,47 @@ function appleHtmlScaled(count, maxCount) {
   return '🍎'.repeat(visual);
 }
 
-function priceBadge(price, avg) {
-  const cheap = price <= avg;
+function priceBadge(price, globalAvg) {
+  const cheap = price <= globalAvg;
   const bg = cheap ? '#1D9E75' : '#E07B54';
   return `<span style="display:inline-block;background:${bg};color:#fff;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:600">${price}円</span>`;
 }
 
-const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月'];
-
-function renderMonths(containerId, counts, prices, avgPrice, maxCount) {
+function renderGroups(containerId, groups, globalAvg, maxGroupCount) {
   const container = document.getElementById(containerId);
-  container.innerHTML = MONTH_NAMES.map((m, i) => `
+  container.innerHTML = groups.map(g => `
     <div class="month-col">
-      <div class="month-apples">${appleHtmlScaled(counts[i], maxCount)}</div>
-      <div class="month-count">${counts[i].toLocaleString()}個</div>
-      ${priceBadge(prices[i], avgPrice)}
-      <div class="month-name">${m}</div>
+      <div class="month-apples">${appleHtmlScaled(g.total, maxGroupCount)}</div>
+      <div class="month-count">${g.total.toLocaleString()}個</div>
+      ${priceBadge(g.avgP, globalAvg)}
+      <div class="month-name">${g.label}</div>
     </div>
   `).join('');
 }
 
 document.getElementById('gen-btn').onclick = () => {
-  const prices = randomPrices();
-  const avgPrice = Math.round(prices.reduce((s,p)=>s+p,0)/prices.length);
+  const prices = randomPrices(periods);
+  const globalAvg = Math.round(prices.reduce((s,p)=>s+p,0)/prices.length);
   const a = calcA(monthly, prices);
   const b = calcB(monthly, prices);
-  const maxCount = Math.max(...a.counts, ...b.counts);
 
-  renderMonths('months-a', a.counts, prices, avgPrice, maxCount);
-  renderMonths('months-b', b.counts, prices, avgPrice, maxCount);
+  const groupsA = makeGroups(a.counts, prices, periods);
+  const groupsB = makeGroups(b.counts, prices, periods);
+  const maxGroupCount = Math.max(...groupsA.map(g=>g.total), ...groupsB.map(g=>g.total));
 
-  document.getElementById('summary-a').textContent = `合計 ${a.total}個 ／ 平均単価 ${a.avg}円 ／ 総支出 ${(a.spend/10000).toFixed(1)}万円`;
-  document.getElementById('summary-b').textContent = `合計 ${b.total}個 ／ 平均単価 ${b.avg}円 ／ 総支出 ${(b.spend/10000).toFixed(1)}万円`;
+  renderGroups('months-a', groupsA, globalAvg, maxGroupCount);
+  renderGroups('months-b', groupsB, globalAvg, maxGroupCount);
 
-  document.getElementById('r-total-a').textContent = `${a.total}個`;
-  document.getElementById('r-total-b').textContent = `${b.total}個`;
+  document.getElementById('summary-a').textContent = `合計 ${a.total.toLocaleString()}個 ／ 平均単価 ${a.avg}円 ／ 総支出 ${(a.spend/10000).toFixed(1)}万円`;
+  document.getElementById('summary-b').textContent = `合計 ${b.total.toLocaleString()}個 ／ 平均単価 ${b.avg}円 ／ 総支出 ${(b.spend/10000).toFixed(1)}万円`;
+
+  document.getElementById('r-total-a').textContent = `${a.total.toLocaleString()}個`;
+  document.getElementById('r-total-b').textContent = `${b.total.toLocaleString()}個`;
   document.getElementById('r-avg-a').textContent = `${a.avg}円`;
   document.getElementById('r-avg-b').textContent = `${b.avg}円`;
+
+  const periodLabel = periods === 12 ? '1年後' : periods === 24 ? '2年後' : periods === 36 ? '3年後' : `${periods}ヶ月後`;
+  document.getElementById('result-title').textContent = `${periodLabel}の比較`;
 
   const diff = b.total - a.total;
   const avgDiff = a.avg - b.avg;
@@ -183,8 +223,8 @@ document.getElementById('gen-btn').onclick = () => {
   wMain.style.color = bWins ? '#0F6E56' : '#92400E';
   wSub.style.color = bWins ? '#1D9E75' : '#B45309';
   wMain.textContent = bWins
-    ? `定額購入で${diff}個多く買えた！`
-    : `今回は定量購入が${Math.abs(diff)}個多い`;
+    ? `定額購入で${diff.toLocaleString()}個多く買えた！`
+    : `今回は定量購入が${Math.abs(diff).toLocaleString()}個多い`;
   wSub.textContent = bWins
     ? `平均単価が${avgDiff}円お得`
     : `相場によっては定量が有利なこともあります`;
