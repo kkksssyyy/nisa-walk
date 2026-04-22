@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🍎 リンゴでわかる！ドルコスト平均法</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1D9E75;overflow:hidden;height:100vh;user-select:none;}
+.slide-wrap{position:relative;width:100%;height:100vh;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2.5rem 3rem 5rem;background:#fff;opacity:0;transition:opacity 0.35s;pointer-events:none;text-align:center;}
+.slide.active{opacity:1;pointer-events:all;}
+.slide-emoji{font-size:72px;line-height:1;margin-bottom:1rem;}
+.slide-tag{display:inline-block;font-size:13px;font-weight:700;padding:4px 16px;border-radius:99px;margin-bottom:0.75rem;letter-spacing:0.04em;}
+.tag-a{background:#E1F5EE;color:#0F6E56;}
+.tag-b{background:#FFF0EB;color:#854F0B;}
+.slide-title{font-size:34px;font-weight:700;color:#1A1A1A;margin-bottom:0.75rem;line-height:1.35;}
+.slide-sub{font-size:19px;color:#555;line-height:1.7;max-width:640px;}
+.hl{color:#1D9E75;font-weight:700;}
+.red{color:#E07B54;font-weight:700;}
+/* month cards */
+.month-row{display:flex;gap:1.5rem;margin:1.5rem auto 0;justify-content:center;}
+.month-card{padding:1.25rem 1.75rem;border-radius:16px;min-width:140px;}
+.month-card.neutral{background:#F5F5F5;}
+.month-card.cheap{background:#E1F5EE;}
+.month-card.pricey{background:#FFF0EB;}
+.month-card .mc-month{font-size:13px;color:#888;margin-bottom:4px;}
+.month-card .mc-apple{font-size:36px;line-height:1;margin-bottom:4px;}
+.month-card .mc-price{font-size:26px;font-weight:700;}
+.month-card .mc-label{font-size:12px;font-weight:700;margin-top:2px;}
+/* table */
+.res-table{border-collapse:collapse;margin:1.25rem auto 0;font-size:17px;}
+.res-table th{background:#1D9E75;color:#fff;padding:9px 18px;font-weight:600;}
+.res-table td{border:1.5px solid #E0E0E0;padding:9px 18px;text-align:center;}
+.res-table tr:nth-child(even) td{background:#F9F9F9;}
+.res-table .total td{background:#F0F0F0;font-weight:700;}
+/* compare */
+.compare{display:flex;align-items:center;gap:1.5rem;margin-top:1.5rem;}
+.cbox{border:2.5px solid #E0E0E0;border-radius:16px;padding:1.25rem 2rem;text-align:center;}
+.cbox.win{border-color:#1D9E75;background:#F7FDF9;}
+.cbox .cl{font-size:13px;color:#888;margin-bottom:4px;}
+.cbox .cv{font-size:32px;font-weight:700;color:#1A1A1A;}
+.cbox .ca{font-size:14px;color:#888;margin-top:4px;}
+.cbox.win .cv{color:#1D9E75;}
+.cbox.win .ca{color:#1D9E75;font-weight:600;}
+/* why boxes */
+.why-list{display:flex;flex-direction:column;gap:0.875rem;margin-top:1.5rem;max-width:540px;}
+.why-row{display:flex;align-items:center;gap:1rem;border-radius:14px;padding:0.875rem 1.25rem;text-align:left;}
+.why-row.down{background:#E1F5EE;}
+.why-row.up{background:#FFF0EB;}
+.why-row .wr-icon{font-size:30px;flex-shrink:0;}
+.why-row .wr-title{font-size:16px;font-weight:700;margin-bottom:2px;}
+.why-row .wr-desc{font-size:15px;color:#444;}
+/* nav */
+.nav{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:1.25rem;z-index:10;}
+.nav-btn{width:48px;height:48px;border-radius:50%;border:none;background:#1D9E75;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;}
+.nav-btn:disabled{opacity:0.3;cursor:default;}
+.nav-dots{display:flex;gap:7px;}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.5);transition:background 0.2s;}
+.dot.on{background:#fff;}
+/* back link */
+.back-link{position:fixed;top:1rem;left:1.25rem;font-size:12px;color:#1D9E75;text-decoration:none;background:#fff;padding:4px 12px;border-radius:99px;z-index:10;}
+.back-link:hover{opacity:0.8;}
+</style>
+</head>
+<body>
+<a class="back-link" href="index.html">← メニューに戻る</a>
+
+<div class="slide-wrap">
+
+  <!-- 1: タイトル -->
+  <div class="slide active">
+    <div class="slide-emoji">🍎</div>
+    <div class="slide-title">リンゴでわかる！<br>お金のかしこい使い方</div>
+    <div class="slide-sub" style="margin-top:0.5rem;">「毎月おなじ金額で買い続けると<br>なぜおトクになるの？」</div>
+    <div style="font-size:14px;color:#aaa;margin-top:2rem;">▶ ボタンでページをめくれます</div>
+  </div>
+
+  <!-- 2: 登場人物 -->
+  <div class="slide">
+    <div class="slide-emoji">👦</div>
+    <div class="slide-title">さとくんはリンゴが大好き！</div>
+    <div class="slide-sub">
+      毎月 <span class="hl">300円</span> でリンゴを買うことにしました。<br><br>
+      でも、リンゴの値段は<br>毎月かわります…
+    </div>
+  </div>
+
+  <!-- 3: 値段の変動 -->
+  <div class="slide">
+    <div class="slide-emoji">🏪</div>
+    <div class="slide-title">リンゴの値段は毎月かわる！</div>
+    <div class="month-row">
+      <div class="month-card neutral">
+        <div class="mc-month">1月</div>
+        <div class="mc-apple">🍎</div>
+        <div class="mc-price">100円</div>
+        <div class="mc-label" style="color:#888;">ふつう</div>
+      </div>
+      <div class="month-card cheap">
+        <div class="mc-month">2月</div>
+        <div class="mc-apple">🍎</div>
+        <div class="mc-price" style="color:#1D9E75;">50円</div>
+        <div class="mc-label" style="color:#1D9E75;">やすい！</div>
+      </div>
+      <div class="month-card pricey">
+        <div class="mc-month">3月</div>
+        <div class="mc-apple">🍎</div>
+        <div class="mc-price" style="color:#E07B54;">150円</div>
+        <div class="mc-label" style="color:#E07B54;">たかい…</div>
+      </div>
+    </div>
+    <div class="slide-sub" style="margin-top:1.5rem;">毎月 <span class="hl">300円</span> あるとき、どうやって買えばいい？</div>
+  </div>
+
+  <!-- 4: 作戦A 説明 -->
+  <div class="slide">
+    <div class="slide-tag tag-a">作戦 A</div>
+    <div class="slide-title">毎月 おなじ個数 を買う</div>
+    <div class="slide-sub">
+      「毎月 <span class="hl">3個</span> ずつ買う！」と決めた。<br>
+      値段が高くても安くても、かならず3個。
+    </div>
+    <div style="font-size:56px;margin-top:1.5rem;">🍎🍎🍎</div>
+    <div style="font-size:15px;color:#888;margin-top:0.5rem;">毎月かならず3個</div>
+  </div>
+
+  <!-- 5: 作戦A 結果 -->
+  <div class="slide">
+    <div class="slide-tag tag-a">作戦 A の結果</div>
+    <div class="slide-title">3個ずつ買ったら…？</div>
+    <table class="res-table">
+      <tr><th>月</th><th>値段</th><th>個数</th><th>払ったお金</th></tr>
+      <tr><td>1月</td><td>100円</td><td>3個</td><td>300円</td></tr>
+      <tr><td>2月</td><td class="hl">50円 安い！</td><td>3個</td><td>150円 😢</td></tr>
+      <tr><td>3月</td><td class="red">150円 高い</td><td>3個</td><td class="red">450円 😰</td></tr>
+      <tr class="total"><td colspan="2">合計</td><td>9個</td><td>900円</td></tr>
+    </table>
+    <div class="slide-sub" style="margin-top:1rem;font-size:16px;">
+      安い月も3個しか買わない → もったいない！<br>
+      高い月も3個 → たくさん払ってしまう…
+    </div>
+  </div>
+
+  <!-- 6: 作戦B 説明 -->
+  <div class="slide">
+    <div class="slide-tag tag-b">作戦 B</div>
+    <div class="slide-title">毎月 おなじ金額 で買う</div>
+    <div class="slide-sub">
+      「毎月 <span class="hl">300円分</span> 買う！」と決めた。<br>
+      安いときはたくさん、高いときは少なめ。
+    </div>
+    <div class="month-row" style="font-size:14px;">
+      <div style="text-align:center;">
+        <div style="font-size:34px;">🍎🍎🍎</div>
+        <div style="color:#888;margin-top:4px;">1月（100円）→ 3個</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:34px;">🍎🍎🍎🍎🍎🍎</div>
+        <div style="color:#1D9E75;font-weight:700;margin-top:4px;">2月（50円）→ 6個！</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:34px;">🍎🍎</div>
+        <div style="color:#E07B54;margin-top:4px;">3月（150円）→ 2個</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7: 作戦B 結果 -->
+  <div class="slide">
+    <div class="slide-tag tag-b">作戦 B の結果</div>
+    <div class="slide-title">300円ずつ買ったら…？</div>
+    <table class="res-table">
+      <tr><th>月</th><th>値段</th><th>個数</th><th>払ったお金</th></tr>
+      <tr><td>1月</td><td>100円</td><td>3個</td><td>300円</td></tr>
+      <tr><td>2月</td><td class="hl">50円 安い！</td><td class="hl">6個！</td><td>300円 😊</td></tr>
+      <tr><td>3月</td><td class="red">150円 高い</td><td>2個</td><td>300円 👍</td></tr>
+      <tr class="total"><td colspan="2">合計</td><td class="hl">11個</td><td>900円</td></tr>
+    </table>
+    <div class="slide-sub" style="margin-top:1rem;font-size:16px;">
+      払ったお金は同じ <span class="hl">900円</span>。<br>
+      でも安いときにたくさん買えた！
+    </div>
+  </div>
+
+  <!-- 8: くらべる -->
+  <div class="slide">
+    <div class="slide-emoji">⚖️</div>
+    <div class="slide-title">くらべてみよう！</div>
+    <div style="font-size:15px;color:#888;margin-bottom:0.25rem;">どちらも 900円 つかいました</div>
+    <div class="compare">
+      <div class="cbox">
+        <div class="cl">作戦 A（同じ個数）</div>
+        <div class="cv">9個</div>
+        <div class="ca">平均 100円 / 個</div>
+      </div>
+      <div style="font-size:36px;">vs</div>
+      <div class="cbox win">
+        <div class="cl">作戦 B（同じ金額）</div>
+        <div class="cv">11個 🎉</div>
+        <div class="ca">平均 約82円 / 個</div>
+      </div>
+    </div>
+    <div class="slide-sub" style="margin-top:1.25rem;">
+      おなじ 900円 なのに <span class="hl">2個も多く</span> 買えた！<br>
+      平均の値段も <span class="hl">18円もやすい</span>！
+    </div>
+  </div>
+
+  <!-- 9: なぜ？ -->
+  <div class="slide">
+    <div class="slide-emoji">💡</div>
+    <div class="slide-title">なぜおトクなの？</div>
+    <div class="why-list">
+      <div class="why-row down">
+        <div class="wr-icon">📉</div>
+        <div>
+          <div class="wr-title" style="color:#0F6E56;">安い月 → たくさん買える</div>
+          <div class="wr-desc">安いときに多く買うから、平均が下がる！</div>
+        </div>
+      </div>
+      <div class="why-row up">
+        <div class="wr-icon">📈</div>
+        <div>
+          <div class="wr-title" style="color:#854F0B;">高い月 → 少しだけ買う</div>
+          <div class="wr-desc">高いときは自動的に少なめ。損しにくい！</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-sub" style="margin-top:1.25rem;">
+      「同じ金額」で買い続けると、<br>自動的に <span class="hl">かしこい買い方</span> ができる！
+    </div>
+  </div>
+
+  <!-- 10: まとめ -->
+  <div class="slide">
+    <div class="slide-emoji">🎉</div>
+    <div class="slide-title">これが「ドルコスト平均法」！</div>
+    <div class="slide-sub">
+      毎月 <span class="hl">おなじ金額</span> でコツコツ買い続ける。<br><br>
+      株や投資信託でも、まったく同じ！<br>
+      NISA の積み立ては、このしくみで動いています。<br><br>
+      <span style="font-size:17px;color:#aaa;">むずかしそうに聞こえるけど、<br>リンゴの買い方と同じことなんです 🍎</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ナビゲーション -->
+<div class="nav">
+  <button class="nav-btn" id="prev-btn" disabled>◀</button>
+  <div class="nav-dots" id="dots"></div>
+  <button class="nav-btn" id="next-btn">▶</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+const dotsEl = document.getElementById('dots');
+for (let i = 0; i < total; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' on' : '');
+  dotsEl.appendChild(d);
+}
+
+function go(n) {
+  slides[cur].classList.remove('active');
+  dotsEl.children[cur].classList.remove('on');
+  cur = n;
+  slides[cur].classList.add('active');
+  dotsEl.children[cur].classList.add('on');
+  document.getElementById('prev-btn').disabled = cur === 0;
+  document.getElementById('next-btn').disabled = cur === total - 1;
+}
+
+document.getElementById('prev-btn').onclick = () => { if (cur > 0) go(cur - 1); };
+document.getElementById('next-btn').onclick = () => { if (cur < total - 1) go(cur + 1); };
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (cur < total - 1) go(cur + 1); }
+  if (e.key === 'ArrowLeft') { if (cur > 0) go(cur - 1); }
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (dx < -50 && cur < total - 1) go(cur + 1);
+  if (dx > 50 && cur > 0) go(cur - 1);
+});
+</script>
+</body>
+</html>
